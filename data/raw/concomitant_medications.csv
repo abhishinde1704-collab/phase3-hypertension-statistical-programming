@@ -1,0 +1,78 @@
+SUBJECT,MEDICATION,INDICATION,START_DATE,END_DATE,DOSE,DOSE_UNIT,FREQUENCY,ROUTE
+HTN101-006,Metformin,Diabetes,2025-12-12,2026-03-04,20,mg,PRN,ORAL
+HTN101-006,Aspirin,Cardiovascular prophylaxis,2025-12-13,2026-02-19,100,mg,QD,ORAL
+HTN101-007,Ibuprofen,Pain,2025-12-22,2026-05-10,100,mg,QD,ORAL
+HTN101-008,Aspirin,Cardiovascular prophylaxis,2026-01-31,2026-03-13,500,mg,PRN,ORAL
+HTN101-010,Ibuprofen,Pain,2026-01-02,2026-03-29,5,mg,QD,ORAL
+HTN101-010,Metformin,Diabetes,2025-12-12,2026-03-22,10,mg,BID,ORAL
+HTN101-013,Ibuprofen,Pain,2026-01-22,2026-03-19,500,mg,BID,ORAL
+HTN101-014,Metformin,Diabetes,2025-12-30,2026-05-14,5,mg,QD,ORAL
+HTN101-014,Atorvastatin,Hyperlipidemia,2026-01-06,2026-03-06,500,mg,BID,ORAL
+HTN101-016,Amlodipine,Hypertension,2026-01-01,2026-04-11,50,mg,BID,ORAL
+HTN101-016,Atorvastatin,Hyperlipidemia,2026-01-05,2026-03-04,5,mg,PRN,ORAL
+HTN101-020,Metformin,Diabetes,2026-01-06,2026-03-20,50,mg,QD,ORAL
+HTN101-020,Amlodipine,Hypertension,2026-01-14,2026-04-22,500,mg,PRN,ORAL
+HTN101-022,Amlodipine,Hypertension,2025-12-26,2026-03-22,500,mg,BID,ORAL
+HTN101-022,Aspirin,Cardiovascular prophylaxis,2025-12-18,2026-05-05,50,mg,BID,ORAL
+HTN101-023,Metformin,Diabetes,2026-01-27,2026-04-07,5,mg,BID,ORAL
+HTN101-023,Ibuprofen,Pain,2026-01-25,2026-05-06,20,mg,PRN,ORAL
+HTN101-025,Amlodipine,Hypertension,2026-01-23,2026-06-02,5,mg,QD,ORAL
+HTN101-025,Ibuprofen,Pain,2026-01-22,2026-03-14,5,mg,QD,ORAL
+HTN101-027,Aspirin,Cardiovascular prophylaxis,2026-01-10,2026-04-27,10,mg,QD,ORAL
+HTN101-031,Ibuprofen,Pain,2026-01-09,2026-04-10,5,mg,PRN,ORAL
+HTN101-031,Aspirin,Cardiovascular prophylaxis,2026-01-18,2026-03-17,100,mg,PRN,ORAL
+HTN101-032,Atorvastatin,Hyperlipidemia,2026-01-10,2026-02-27,5,mg,BID,ORAL
+HTN101-037,Atorvastatin,Hyperlipidemia,2026-01-10,2026-04-20,50,mg,BID,ORAL
+HTN101-037,Metformin,Diabetes,2026-01-11,2026-04-04,20,mg,PRN,ORAL
+HTN101-039,Ibuprofen,Pain,2026-01-07,2026-03-17,10,mg,QD,ORAL
+HTN101-039,Amlodipine,Hypertension,2025-12-22,2026-04-20,10,mg,QD,ORAL
+HTN101-040,Ibuprofen,Pain,2026-01-07,2026-03-20,20,mg,PRN,ORAL
+HTN101-040,Metformin,Diabetes,2026-01-13,2026-03-27,20,mg,PRN,ORAL
+HTN101-042,Metformin,Diabetes,2026-01-11,2026-04-17,50,mg,BID,ORAL
+HTN101-043,Amlodipine,Hypertension,2026-01-02,2026-04-08,500,mg,PRN,ORAL
+HTN101-049,Metformin,Diabetes,2026-01-09,2026-03-12,500,mg,BID,ORAL
+HTN101-049,Aspirin,Cardiovascular prophylaxis,2025-12-25,2026-02-25,500,mg,QD,ORAL
+HTN101-050,Ibuprofen,Pain,2025-12-20,2026-04-20,50,mg,BID,ORAL
+HTN101-051,Atorvastatin,Hyperlipidemia,2025-12-22,2026-05-05,500,mg,PRN,ORAL
+HTN101-051,Amlodipine,Hypertension,2025-12-23,2026-03-25,20,mg,PRN,ORAL
+HTN101-052,Metformin,Diabetes,2026-01-19,2026-04-07,500,mg,PRN,ORAL
+HTN101-052,Aspirin,Cardiovascular prophylaxis,2026-01-22,2026-04-21,50,mg,BID,ORAL
+HTN101-053,Aspirin,Cardiovascular prophylaxis,2025-12-18,2026-03-12,20,mg,PRN,ORAL
+HTN101-053,Amlodipine,Hypertension,2025-12-23,2026-04-15,5,mg,BID,ORAL
+HTN101-055,Amlodipine,Hypertension,2025-12-24,2026-02-28,100,mg,QD,ORAL
+HTN101-056,Ibuprofen,Pain,2025-12-20,2026-04-24,50,mg,PRN,ORAL
+HTN101-056,Atorvastatin,Hyperlipidemia,2025-12-27,2026-02-21,50,mg,BID,ORAL
+HTN101-058,Amlodipine,Hypertension,2026-01-14,2026-04-23,5,mg,BID,ORAL
+HTN101-058,Metformin,Diabetes,2026-01-08,2026-03-19,5,mg,BID,ORAL
+HTN101-060,Aspirin,Cardiovascular prophylaxis,2025-12-25,2026-04-15,20,mg,BID,ORAL
+HTN101-061,Aspirin,Cardiovascular prophylaxis,2026-01-05,2026-04-15,50,mg,PRN,ORAL
+HTN101-061,Amlodipine,Hypertension,2026-01-02,2026-04-18,500,mg,PRN,ORAL
+HTN101-062,Ibuprofen,Pain,2026-01-20,2026-03-02,20,mg,PRN,ORAL
+HTN101-062,Aspirin,Cardiovascular prophylaxis,2026-01-24,2026-04-18,5,mg,PRN,ORAL
+HTN101-063,Ibuprofen,Pain,2025-12-21,2026-04-29,20,mg,BID,ORAL
+HTN101-067,Amlodipine,Hypertension,2026-01-09,2026-05-13,500,mg,PRN,ORAL
+HTN101-067,Metformin,Diabetes,2026-01-02,2026-04-11,500,mg,BID,ORAL
+HTN101-072,Metformin,Diabetes,2026-01-25,2026-03-18,20,mg,PRN,ORAL
+HTN101-072,Ibuprofen,Pain,2026-02-02,2026-04-24,500,mg,QD,ORAL
+HTN101-075,Metformin,Diabetes,2026-01-10,2026-04-18,500,mg,QD,ORAL
+HTN101-076,Atorvastatin,Hyperlipidemia,2025-12-19,2026-03-22,10,mg,QD,ORAL
+HTN101-077,Metformin,Diabetes,2026-01-19,2026-04-01,10,mg,BID,ORAL
+HTN101-077,Atorvastatin,Hyperlipidemia,2026-01-28,2026-04-28,100,mg,QD,ORAL
+HTN101-079,Ibuprofen,Pain,2026-01-11,2026-04-23,20,mg,PRN,ORAL
+HTN101-079,Metformin,Diabetes,2026-01-30,2026-03-03,50,mg,PRN,ORAL
+HTN101-080,Aspirin,Cardiovascular prophylaxis,2025-12-24,2026-02-20,500,mg,QD,ORAL
+HTN101-080,Atorvastatin,Hyperlipidemia,2025-12-14,2026-05-04,50,mg,BID,ORAL
+HTN101-081,Ibuprofen,Pain,2025-12-31,2026-02-24,50,mg,QD,ORAL
+HTN101-081,Aspirin,Cardiovascular prophylaxis,2025-12-19,2026-03-20,10,mg,BID,ORAL
+HTN101-083,Aspirin,Cardiovascular prophylaxis,2025-12-26,2026-03-21,50,mg,PRN,ORAL
+HTN101-083,Amlodipine,Hypertension,2026-01-06,2026-05-06,50,mg,QD,ORAL
+HTN101-085,Metformin,Diabetes,2026-01-12,2026-05-19,10,mg,QD,ORAL
+HTN101-085,Ibuprofen,Pain,2026-01-16,2026-04-01,10,mg,QD,ORAL
+HTN101-088,Amlodipine,Hypertension,2026-01-04,2026-04-15,50,mg,BID,ORAL
+HTN101-088,Ibuprofen,Pain,2025-12-26,2026-02-07,10,mg,PRN,ORAL
+HTN101-089,Aspirin,Cardiovascular prophylaxis,2026-01-18,2026-03-13,50,mg,PRN,ORAL
+HTN101-092,Aspirin,Cardiovascular prophylaxis,2026-01-03,2026-02-23,100,mg,BID,ORAL
+HTN101-092,Ibuprofen,Pain,2026-01-21,2026-03-18,5,mg,PRN,ORAL
+HTN101-095,Atorvastatin,Hyperlipidemia,2026-01-19,2026-03-14,20,mg,QD,ORAL
+HTN101-096,Amlodipine,Hypertension,2026-01-17,2026-04-01,50,mg,PRN,ORAL
+HTN101-096,Aspirin,Cardiovascular prophylaxis,2026-01-07,2026-04-25,20,mg,BID,ORAL
