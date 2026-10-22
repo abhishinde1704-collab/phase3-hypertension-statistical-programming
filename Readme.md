@@ -14,16 +14,14 @@ This repository contains an end-to-end clinical statistical programming portfoli
 ## 📂 Repository Structure
 *   `docs/`: Protocol, SAP, aCRF, and specifications.
 *   `data/`: Raw CSVs, SDTM XPTs, and ADaM XPTs.
-*   `logs/`: Log files of sdtm,adam and tlf.
 *   `programs/`: 
     *   `r/`: Raw data generation QC and programs.
     *   `sas/sdtm/`: SDTM domain programs (DM, EX, VS, LB, AE, TS).
     *   `sas/adam/`: ADaM dataset programs (ADSL, ADAE, ADVS, ADLB).
     *   `sas/tlf/`: Table, Listing, and Figure programs.
     *   `sas/qc/`: Independent validation programs.
-*   `validation/`: 
+*   `validation/`: Report files and
     *    `Logs/`: QC log files.
-    *    `Pinnacle 21 report/`: Report files.
 *   `output/`: Final TLFs (PDF) and Define-XML.
 
 ## 🚀 Key Deliverables
