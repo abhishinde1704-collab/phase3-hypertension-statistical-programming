@@ -1,0 +1,479 @@
+ 
+ 1          OPTIONS NONOTES NOSTIMER NOSOURCE NOSYNTAXCHECK;
+ 68         
+ 69         /*==========================================================
+ 70           Program : QC_LB.sas
+ 71           Study   : HTN101-301
+ 72           Purpose : Independent QC of SDTM LB domain
+ 73           Author  : Abhijeet Shinde
+ 74         ==========================================================*/
+ 75         
+ 76         %include "&ROOT/programs/sas/00_setup.sas";
+ NOTE: Libref RAW was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/data/raw
+ NOTE: Libref SDTM was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/data/sdtm
+ NOTE: Libref ADAM was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/data/adam
+ NOTE: Libref OUT was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/output
+ NOTE: Libref _T1 was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/output/tables
+ NOTE: Libref _T2 was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/output/listings
+ NOTE: Libref _T3 was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/output/figures
+ NOTE: ============================================
+ NOTE: Study ID  : HTN101-301
+ NOTE: Root      : /home/u64305129/Project/HTN101
+ NOTE: SDTM lib  : /home/u64305129/Project/HTN101/data/sdtm
+ NOTE: ADaM lib  : /home/u64305129/Project/HTN101/data/adam
+ NOTE: QC lib    : /home/u64305129/Project/HTN101/validation/QC
+ NOTE: Tables    : /home/u64305129/Project/HTN101/output/tables
+ NOTE: Listings  : /home/u64305129/Project/HTN101/output/listings
+ NOTE: Figures   : /home/u64305129/Project/HTN101/output/figures
+ NOTE: ============================================
+ 143        
+ 144        title "QC Report — SDTM LB Domain";
+ 145        title2 "Study: &STUDYID";
+ 146        
+ 147        /*==========================================================
+ 148          1. RECORD & SUBJECT COUNT
+ 149        ==========================================================*/
+ 150        proc sql;
+ 151            title3 "1. Record & Subject Counts";
+ 152            select  count(*)                 as N_Records,
+ 153                    count(distinct USUBJID)  as N_Subjects,
+ 154                    count(distinct LBTESTCD) as N_Tests
+ 155            from sdtm.lb;
+ 156        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.00 seconds
+       memory              6840.56k
+       OS Memory           36968.00k
+       Timestamp           10/20/2026 07:30:26 AM
+       Step Count                        615  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     316
+       Page Swaps                        0
+       Voluntary Context Switches        27
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           24
+       
+ 
+ 157        
+ 158        /*==========================================================
+ 159          2. UNIQUENESS — One record per Subject/Test/Visit
+ 160        ==========================================================*/
+ 161        proc sql;
+ 162            title3 "2. Duplicate Subject+Test+Date — Should be 0 rows";
+ 163            select USUBJID, LBTESTCD, LBDTC, count(*) as N
+ 164            from sdtm.lb
+ 165            group by USUBJID, LBTESTCD, LBDTC
+ 166            having count(*) > 1;
+ NOTE: No rows were selected.
+ 167        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.00 seconds
+       memory              6815.53k
+       OS Memory           36968.00k
+       Timestamp           10/20/2026 07:30:26 AM
+       Step Count                        616  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     389
+       Page Swaps                        0
+       Voluntary Context Switches        19
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           16
+       
+ 
+ 168        
+ 169        /*==========================================================
+ 170          3. LBSEQ UNIQUENESS PER SUBJECT
+ 171        ==========================================================*/
+ 172        proc sql;
+ 173            title3 "3. Duplicate LBSEQ per Subject — Should be 0 rows";
+ 174            select USUBJID, LBSEQ, count(*) as N
+ 175            from sdtm.lb
+ 176            group by USUBJID, LBSEQ
+ 177            having count(*) > 1;
+ NOTE: No rows were selected.
+ 178        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.00 seconds
+       system cpu time     0.01 seconds
+       memory              6813.75k
+       OS Memory           36968.00k
+       Timestamp           10/20/2026 07:30:26 AM
+       Step Count                        617  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     368
+       Page Swaps                        0
+       Voluntary Context Switches        19
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           16
+       
+ 
+ 179        
+ 180        /*==========================================================
+ 181          4. REQUIRED VARIABLES — MISSING CHECK
+ 182        ==========================================================*/
+ 183        proc freq data = sdtm.lb;
+ 184            title3 "4. Missing Value Check — Key Variables";
+ 185            tables STUDYID DOMAIN USUBJID LBSEQ LBTESTCD LBTEST
+ 186                   LBCAT LBORRES LBORRESU LBDTC / missing nocum;
+ 187        run;
+ 
+ NOTE: There were 3000 observations read from the data set SDTM.LB.
+ NOTE: PROCEDURE FREQ used (Total process time):
+       real time           2.00 seconds
+       user cpu time       1.98 seconds
+       system cpu time     0.00 seconds
+       memory              3350.75k
+       OS Memory           33896.00k
+       Timestamp           10/20/2026 07:30:28 AM
+       Step Count                        618  Switch Count  3
+       Page Faults                       0
+       Page Reclaims                     651
+       Page Swaps                        0
+       Voluntary Context Switches        33
+       Involuntary Context Switches      20
+       Block Input Operations            0
+       Block Output Operations           1392
+       
+ 
+ 188        
+ 189        /*==========================================================
+ 190          5. STUDYID & DOMAIN CONSTANT
+ 191        ==========================================================*/
+ 192        proc freq data = sdtm.lb;
+ 193            title3 "5. STUDYID and DOMAIN — Should be Constant";
+ 194            tables STUDYID DOMAIN / missing nocum;
+ 195        run;
+ 
+ NOTE: There were 3000 observations read from the data set SDTM.LB.
+ NOTE: PROCEDURE FREQ used (Total process time):
+       real time           0.02 seconds
+       user cpu time       0.02 seconds
+       system cpu time     0.00 seconds
+       memory              2150.90k
+       OS Memory           32872.00k
+       Timestamp           10/20/2026 07:30:28 AM
+       Step Count                        619  Switch Count  3
+       Page Faults                       0
+       Page Reclaims                     346
+       Page Swaps                        0
+       Voluntary Context Switches        34
+       Involuntary Context Switches      2
+       Block Input Operations            0
+       Block Output Operations           264
+       
+ 
+ 196        
+ 197        /*==========================================================
+ 198          6. TEST CODE & TEST NAME MAPPING
+ 199        ==========================================================*/
+ 200        proc freq data = sdtm.lb;
+ 201            title3 "6. LBTESTCD × LBTEST — Should be 1-to-1";
+ 202            tables LBTESTCD * LBTEST / list missing;
+ 203        run;
+ 
+ NOTE: There were 3000 observations read from the data set SDTM.LB.
+ NOTE: PROCEDURE FREQ used (Total process time):
+       real time           0.02 seconds
+       user cpu time       0.02 seconds
+       system cpu time     0.01 seconds
+       memory              2836.06k
+       OS Memory           33652.00k
+       Timestamp           10/20/2026 07:30:28 AM
+       Step Count                        620  Switch Count  9
+       Page Faults                       0
+       Page Reclaims                     541
+       Page Swaps                        0
+       Voluntary Context Switches        75
+       Involuntary Context Switches      4
+       Block Input Operations            0
+       Block Output Operations           1072
+       
+ 
+ 204        
+ 205        /*==========================================================
+ 206          7. CONTROLLED TERMINOLOGY — Expected Test Codes
+ 207        ==========================================================*/
+ 208        data _check_ct;
+ 209            set sdtm.lb;
+ 210            if LBTESTCD not in ("SODIUM", "K", "CREAT",
+ 211                                "GLUC", "ALT", "AST") then output;
+ 212        run;
+ 
+ NOTE: There were 3000 observations read from the data set SDTM.LB.
+ NOTE: The data set WORK._CHECK_CT has 0 observations and 23 variables.
+ NOTE: DATA statement used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.00 seconds
+       memory              2195.56k
+       OS Memory           32872.00k
+       Timestamp           10/20/2026 07:30:28 AM
+       Step Count                        621  Switch Count  2
+       Page Faults                       0
+       Page Reclaims                     348
+       Page Swaps                        0
+       Voluntary Context Switches        20
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           264
+       
+ 
+ 213        
+ 214        proc sql;
+ 215            title3 "7. LBTESTCD Outside Expected CT — Should be 0 rows";
+ 216            select distinct USUBJID, LBTESTCD from _check_ct;
+ NOTE: No rows were selected.
+ 217        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.00 seconds
+       system cpu time     0.00 seconds
+       memory              5597.28k
+       OS Memory           36712.00k
+       Timestamp           10/20/2026 07:30:28 AM
+       Step Count                        622  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     53
+       Page Swaps                        0
+       Voluntary Context Switches        12
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           0
+       
+ 
+ 218        
+ 219        /*==========================================================
+ 220          8. LBCAT / LBSCAT ASSIGNMENT
+ 221        ==========================================================*/
+ 222        proc freq data = sdtm.lb;
+ 223            title3 "8a. LBCAT Distribution — Expected Only CHEMISTRY";
+ 224            tables LBCAT / missing nocum;
+ 225        run;
+ 
+ NOTE: There were 3000 observations read from the data set SDTM.LB.
+ NOTE: PROCEDURE FREQ used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.00 seconds
+       memory              2027.12k
+       OS Memory           32872.00k
+       Timestamp           10/20/2026 07:30:28 AM
+       Step Count                        623  Switch Count  3
+       Page Faults                       0
+       Page Reclaims                     346
+       Page Swaps                        0
+       Voluntary Context Switches        31
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           264
+       
+ 
+ 226        
+ 227        proc freq data = sdtm.lb;
+ 228            title3 "8b. LBCAT × LBTESTCD — Should be 1-to-1";
+ 229            tables LBCAT * LBTESTCD / list missing;
+ 230        run;
+ 
+ NOTE: There were 3000 observations read from the data set SDTM.LB.
+ NOTE: PROCEDURE FREQ used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.02 seconds
+       system cpu time     0.00 seconds
+       memory              2724.50k
+       OS Memory           33652.00k
+       Timestamp           10/20/2026 07:30:28 AM
+       Step Count                        624  Switch Count  9
+       Page Faults                       0
+       Page Reclaims                     541
+       Page Swaps                        0
+       Voluntary Context Switches        70
+       Involuntary Context Switches      2
+       Block Input Operations            0
+       Block Output Operations           1056
+       
+ 
+ 231        
+ 232        proc freq data = sdtm.lb;
+ 233            title3 "8c. LBCAT Distribution";
+ 234            tables LBCAT / missing nocum;
+ 235        run;
+ 
+ NOTE: There were 3000 observations read from the data set SDTM.LB.
+ NOTE: PROCEDURE FREQ used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.01 seconds
+       memory              2139.25k
+       OS Memory           32872.00k
+       Timestamp           10/20/2026 07:30:28 AM
+       Step Count                        625  Switch Count  3
+       Page Faults                       0
+       Page Reclaims                     346
+       Page Swaps                        0
+       Voluntary Context Switches        31
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           264
+       
+ 
+ 236        
+ 237        /*==========================================================
+ 238          9. RESULT RANGE CHECK — Plausibility
+ 239        ==========================================================*/
+ 240        proc means data = sdtm.lb n nmiss min max mean std;
+ 241            class LBTESTCD;
+ 242            var LBORRES;              /* if LBORRES is numeric */
+ 243            title3 "9. LBORRES — Ranges by Test";
+ 244        run;
+ 
+ NOTE: There were 3000 observations read from the data set SDTM.LB.
+ NOTE: PROCEDURE MEANS used (Total process time):
+       real time           0.02 seconds
+       user cpu time       0.02 seconds
+       system cpu time     0.00 seconds
+       memory              10397.01k
+       OS Memory           40568.00k
+       Timestamp           10/20/2026 07:30:28 AM
+       Step Count                        626  Switch Count  2
+       Page Faults                       0
+       Page Reclaims                     2240
+       Page Swaps                        0
+       Voluntary Context Switches        31
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           16
+       
+ 
+ 245        
+ 246        /*==========================================================
+ 247          10. STUDY DAY CHECK — LBDY should never be 0
+ 248        ==========================================================*/
+ 249        proc sql;
+ 250            title3 "10. LBDY = 0 — Should be 0 rows (no Day 0)";
+ 251            select USUBJID, LBTESTCD, LBDTC, LBDY
+ 252            from sdtm.lb
+ 253            where LBDY = 0;
+ NOTE: No rows were selected.
+ 254        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.00 seconds
+       system cpu time     0.00 seconds
+       memory              6925.31k
+       OS Memory           38248.00k
+       Timestamp           10/20/2026 07:30:28 AM
+       Step Count                        627  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     282
+       Page Swaps                        0
+       Voluntary Context Switches        18
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           0
+       
+ 
+ 255        
+ 256        /*==========================================================
+ 257          11. CROSS-DOMAIN — Every DM Subject Should Exist in LB
+ 258        ==========================================================*/
+ 259        proc sql;
+ 260            title3 "11. Subjects in DM but Not in LB";
+ 261            select USUBJID from sdtm.dm
+ 262            where USUBJID not in (select distinct USUBJID from sdtm.lb);
+ NOTE: No rows were selected.
+ 263        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.00 seconds
+       system cpu time     0.00 seconds
+       memory              7086.65k
+       OS Memory           38508.00k
+       Timestamp           10/20/2026 07:30:28 AM
+       Step Count                        628  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     353
+       Page Swaps                        0
+       Voluntary Context Switches        19
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           16
+       
+ 
+ 264        
+ 265        /*==========================================================
+ 266          12. FINAL SUMMARY
+ 267        ==========================================================*/
+ 268        proc sql;
+ 269            title3 "12. QC Summary — LB Domain";
+ 270            select  "Total Records"                 as Check length=35,
+ 271                    put(count(*), 8.)               as Result
+ 272            from sdtm.lb
+ 273            union all
+ 274            select  "Distinct Subjects",
+ 275                    put(count(distinct USUBJID), 8.)
+ 276            from sdtm.lb
+ 277            union all
+ 278            select  "Distinct Test Codes",
+ 279                    put(count(distinct LBTESTCD), 8.)
+ 280            from sdtm.lb
+ 281            union all
+ 282            select  "Distinct Categories",
+ 283                    put(count(distinct LBCAT), 8.)
+ 284            from sdtm.lb
+ 285            union all
+ 286            select  "Missing LBORRES",
+ 287                    put(sum(missing(LBORRES)), 8.)
+ 288            from sdtm.lb
+ 289            union all
+ 290            select  "Missing LBDTC",
+ 291                    put(sum(missing(LBDTC)), 8.)
+ 292            from sdtm.lb
+ 293            union all
+ 294            select  "LBDY = 0 (should be 0)",
+ 295                    put(sum(LBDY = 0), 8.)
+ 296            from sdtm.lb;
+ 297        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.02 seconds
+       system cpu time     0.00 seconds
+       memory              7129.50k
+       OS Memory           38248.00k
+       Timestamp           10/20/2026 07:30:28 AM
+       Step Count                        629  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     328
+       Page Swaps                        0
+       Voluntary Context Switches        18
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           24
+       
+ 
+ 298        
+ 299        title; title2; title3;
+ 300        
+ 301        OPTIONS NONOTES NOSTIMER NOSOURCE NOSYNTAXCHECK;
+ 311        

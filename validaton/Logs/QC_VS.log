@@ -1,0 +1,399 @@
+ 
+ 1          OPTIONS NONOTES NOSTIMER NOSOURCE NOSYNTAXCHECK;
+ 68         
+ 69         /*==========================================================
+ 70           Program : QC_VS.sas
+ 71           Study   : HTN101-301
+ 72           Purpose : Independent QC of SDTM VS domain
+ 73           Author  : Abhijeet Shinde
+ 74         ==========================================================*/
+ 75         
+ 76         %include "&ROOT/programs/sas/00_setup.sas";
+ NOTE: Libref RAW was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/data/raw
+ NOTE: Libref SDTM was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/data/sdtm
+ NOTE: Libref ADAM was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/data/adam
+ NOTE: Libref OUT was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/output
+ NOTE: Libref _T1 was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/output/tables
+ NOTE: Libref _T2 was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/output/listings
+ NOTE: Libref _T3 was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/output/figures
+ NOTE: ============================================
+ NOTE: Study ID  : HTN101-301
+ NOTE: Root      : /home/u64305129/Project/HTN101
+ NOTE: SDTM lib  : /home/u64305129/Project/HTN101/data/sdtm
+ NOTE: ADaM lib  : /home/u64305129/Project/HTN101/data/adam
+ NOTE: QC lib    : /home/u64305129/Project/HTN101/validation/QC
+ NOTE: Tables    : /home/u64305129/Project/HTN101/output/tables
+ NOTE: Listings  : /home/u64305129/Project/HTN101/output/listings
+ NOTE: Figures   : /home/u64305129/Project/HTN101/output/figures
+ NOTE: ============================================
+ 143        
+ 144        title "QC Report — SDTM VS Domain";
+ 145        title2 "Study: &STUDYID";
+ 146        
+ 147        /*==========================================================
+ 148          1. RECORD & SUBJECT COUNT
+ 149        ==========================================================*/
+ 150        proc sql;
+ 151            title3 "1. Record & Subject Counts";
+ 152            select  count(*)                 as N_Records,
+ 153                    count(distinct USUBJID)  as N_Subjects,
+ 154                    count(distinct VSTESTCD) as N_Tests
+ 155            from sdtm.vs;
+ 156        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.00 seconds
+       memory              6167.37k
+       OS Memory           36840.00k
+       Timestamp           10/20/2026 07:30:40 AM
+       Step Count                        635  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     188
+       Page Swaps                        0
+       Voluntary Context Switches        17
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           16
+       
+ 
+ 157        
+ 158        /*==========================================================
+ 159          2. UNIQUENESS — One record per Subject/Test/Visit
+ 160        ==========================================================*/
+ 161        proc sql;
+ 162            title3 "2. Duplicate Subject+Test+Visit — Should be 0 rows";
+ 163            select USUBJID, VSTESTCD, VSDTC, count(*) as N
+ 164            from sdtm.vs
+ 165            group by USUBJID, VSTESTCD, VSDTC
+ 166            having count(*) > 1;
+ NOTE: No rows were selected.
+ 167        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.01 seconds
+       memory              6142.25k
+       OS Memory           36584.00k
+       Timestamp           10/20/2026 07:30:40 AM
+       Step Count                        636  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     238
+       Page Swaps                        0
+       Voluntary Context Switches        17
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           16
+       
+ 
+ 168        
+ 169        /*==========================================================
+ 170          3. VSSEQ UNIQUENESS PER SUBJECT
+ 171        ==========================================================*/
+ 172        proc sql;
+ 173            title3 "3. Duplicate VSSEQ per Subject — Should be 0 rows";
+ 174            select USUBJID, VSSEQ, count(*) as N
+ 175            from sdtm.vs
+ 176            group by USUBJID, VSSEQ
+ 177            having count(*) > 1;
+ NOTE: No rows were selected.
+ 178        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.00 seconds
+       memory              6140.31k
+       OS Memory           36584.00k
+       Timestamp           10/20/2026 07:30:40 AM
+       Step Count                        637  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     219
+       Page Swaps                        0
+       Voluntary Context Switches        17
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           16
+       
+ 
+ 179        
+ 180        /*==========================================================
+ 181          4. REQUIRED VARIABLES — MISSING CHECK
+ 182        ==========================================================*/
+ 183        proc freq data = sdtm.vs;
+ 184            title3 "4. Missing Value Check — Key Variables";
+ 185            tables STUDYID DOMAIN USUBJID VSSEQ VSTESTCD VSTEST
+ 186                   VSORRES VSORRESU VSDTC / missing nocum;
+ 187        run;
+ 
+ NOTE: There were 2000 observations read from the data set SDTM.VS.
+ NOTE: PROCEDURE FREQ used (Total process time):
+       real time           0.37 seconds
+       user cpu time       0.37 seconds
+       system cpu time     0.00 seconds
+       memory              1941.68k
+       OS Memory           31976.00k
+       Timestamp           10/20/2026 07:30:41 AM
+       Step Count                        638  Switch Count  3
+       Page Faults                       0
+       Page Reclaims                     274
+       Page Swaps                        0
+       Voluntary Context Switches        30
+       Involuntary Context Switches      4
+       Block Input Operations            0
+       Block Output Operations           488
+       
+ 
+ 188        
+ 189        /*==========================================================
+ 190          5. STUDYID & DOMAIN CONSTANT
+ 191        ==========================================================*/
+ 192        proc freq data = sdtm.vs;
+ 193            title3 "5. STUDYID and DOMAIN — Should be Constant";
+ 194            tables STUDYID DOMAIN / missing nocum;
+ 195        run;
+ 
+ NOTE: There were 2000 observations read from the data set SDTM.VS.
+ NOTE: PROCEDURE FREQ used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.00 seconds
+       memory              1365.34k
+       OS Memory           31976.00k
+       Timestamp           10/20/2026 07:30:41 AM
+       Step Count                        639  Switch Count  3
+       Page Faults                       0
+       Page Reclaims                     218
+       Page Swaps                        0
+       Voluntary Context Switches        31
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           264
+       
+ 
+ 196        
+ 197        /*==========================================================
+ 198          6. TEST CODE & TEST NAME MAPPING
+ 199        ==========================================================*/
+ 200        proc freq data = sdtm.vs;
+ 201            title3 "6. VSTESTCD × VSTEST — Should be 1-to-1";
+ 202            tables VSTESTCD * VSTEST / list missing;
+ 203        run;
+ 
+ NOTE: There were 2000 observations read from the data set SDTM.VS.
+ NOTE: PROCEDURE FREQ used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.01 seconds
+       memory              2163.93k
+       OS Memory           32756.00k
+       Timestamp           10/20/2026 07:30:41 AM
+       Step Count                        640  Switch Count  9
+       Page Faults                       0
+       Page Reclaims                     410
+       Page Swaps                        0
+       Voluntary Context Switches        72
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           1080
+       
+ 
+ 204        
+ 205        /*==========================================================
+ 206          7. CONTROLLED TERMINOLOGY — Expected Test Codes
+ 207        ==========================================================*/
+ 208        data _check_ct;
+ 209            set sdtm.vs;
+ 210            if VSTESTCD not in ("SYSBP", "DIABP", "PULSE", "WEIGHT") then output;
+ 211        run;
+ 
+ NOTE: There were 2000 observations read from the data set SDTM.VS.
+ NOTE: The data set WORK._CHECK_CT has 0 observations and 20 variables.
+ NOTE: DATA statement used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.00 seconds
+       system cpu time     0.00 seconds
+       memory              1609.00k
+       OS Memory           31976.00k
+       Timestamp           10/20/2026 07:30:41 AM
+       Step Count                        641  Switch Count  2
+       Page Faults                       0
+       Page Reclaims                     221
+       Page Swaps                        0
+       Voluntary Context Switches        25
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           264
+       
+ 
+ 212        
+ 213        proc sql;
+ 214            title3 "7. VSTESTCD Outside Expected CT — Should be 0 rows";
+ 215            select distinct USUBJID, VSTESTCD from _check_ct;
+ NOTE: No rows were selected.
+ 216        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.00 seconds
+       system cpu time     0.00 seconds
+       memory              5596.40k
+       OS Memory           36456.00k
+       Timestamp           10/20/2026 07:30:41 AM
+       Step Count                        642  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     58
+       Page Swaps                        0
+       Voluntary Context Switches        13
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           0
+       
+ 
+ 217        
+ 218        /*==========================================================
+ 219          8. RESULT RANGE CHECK — Plausibility
+ 220        ==========================================================*/
+ 221        proc means data = sdtm.vs n nmiss min max mean std;
+ 222            class VSTESTCD;
+ 223            var VSSTRESN;
+ 224            title3 "8. VSSTRESN — Ranges by Test";
+ 225        run;
+ 
+ NOTE: There were 2000 observations read from the data set SDTM.VS.
+ NOTE: PROCEDURE MEANS used (Total process time):
+       real time           0.02 seconds
+       user cpu time       0.02 seconds
+       system cpu time     0.00 seconds
+       memory              9574.31k
+       OS Memory           39928.00k
+       Timestamp           10/20/2026 07:30:41 AM
+       Step Count                        643  Switch Count  2
+       Page Faults                       0
+       Page Reclaims                     2102
+       Page Swaps                        0
+       Voluntary Context Switches        29
+       Involuntary Context Switches      3
+       Block Input Operations            0
+       Block Output Operations           0
+       
+ 
+ 226        
+ 227        /*==========================================================
+ 228          9. STUDY DAY CHECK — VSDY should never be 0
+ 229        ==========================================================*/
+ 230        proc sql;
+ 231            title3 "9. VSDY = 0 — Should be 0 rows (no Day 0)";
+ 232            select USUBJID, VSTESTCD, VSDTC, VSDY
+ 233            from sdtm.vs
+ 234            where VSDY = 0;
+ NOTE: No rows were selected.
+ 235        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.00 seconds
+       system cpu time     0.00 seconds
+       memory              6252.50k
+       OS Memory           37608.00k
+       Timestamp           10/20/2026 07:30:41 AM
+       Step Count                        644  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     151
+       Page Swaps                        0
+       Voluntary Context Switches        16
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           8
+       
+ 
+ 236        
+ 237        /*==========================================================
+ 238          10. CROSS-DOMAIN — Every DM Subject Should Exist in VS
+ 239        ==========================================================*/
+ 240        proc sql;
+ 241            title3 "10. Subjects in DM but Not in VS";
+ 242            select USUBJID from sdtm.dm
+ 243            where USUBJID not in (select distinct USUBJID from sdtm.vs);
+ NOTE: No rows were selected.
+ 244        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.01 seconds
+       memory              6414.68k
+       OS Memory           37868.00k
+       Timestamp           10/20/2026 07:30:41 AM
+       Step Count                        645  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     194
+       Page Swaps                        0
+       Voluntary Context Switches        20
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           8
+       
+ 
+ 245        
+ 246        /*==========================================================
+ 247          11. FINAL SUMMARY
+ 248        ==========================================================*/
+ 249        proc sql;
+ 250            title3 "11. QC Summary — VS Domain";
+ 251            select  "Total Records"                 as Check length=35,
+ 252                    put(count(*), 8.)               as Result
+ 253            from sdtm.vs
+ 254            union all
+ 255            select  "Distinct Subjects",
+ 256                    put(count(distinct USUBJID), 8.)
+ 257            from sdtm.vs
+ 258            union all
+ 259            select  "Distinct Test Codes",
+ 260                    put(count(distinct VSTESTCD), 8.)
+ 261            from sdtm.vs
+ 262            union all
+ 263            select  "Missing VSSTRESN",
+ 264                    put(sum(VSSTRESN = .), 8.)
+ 265            from sdtm.vs
+ 266            union all
+ 267            select  "Missing VSDTC",
+ 268                    put(sum(VSDTC = ""), 8.)
+ 269            from sdtm.vs
+ 270            union all
+ 271            select  "VSDY = 0 (should be 0)",
+ 272                    put(sum(VSDY = 0), 8.)
+ 273            from sdtm.vs;
+ 274        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.00 seconds
+       memory              6343.78k
+       OS Memory           37608.00k
+       Timestamp           10/20/2026 07:30:41 AM
+       Step Count                        646  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     179
+       Page Swaps                        0
+       Voluntary Context Switches        18
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           16
+       
+ 
+ 275        
+ 276        title; title2; title3;
+ 277        
+ 278        OPTIONS NONOTES NOSTIMER NOSOURCE NOSYNTAXCHECK;
+ 288        

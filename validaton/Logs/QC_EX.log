@@ -1,0 +1,414 @@
+ 
+ 1          OPTIONS NONOTES NOSTIMER NOSOURCE NOSYNTAXCHECK;
+ 68         
+ 69         /*==========================================================
+ 70           Program : QC_EX.sas
+ 71           Study   : HTN101-301
+ 72           Purpose : Independent QC of SDTM EX domain
+ 73           Author  : Abhijeet Shinde
+ 74         ==========================================================*/
+ 75         
+ 76         %include "&ROOT/programs/sas/00_setup.sas";
+ NOTE: Libref RAW was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/data/raw
+ NOTE: Libref SDTM was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/data/sdtm
+ NOTE: Libref ADAM was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/data/adam
+ NOTE: Libref OUT was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/output
+ NOTE: Libref _T1 was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/output/tables
+ NOTE: Libref _T2 was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/output/listings
+ NOTE: Libref _T3 was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/output/figures
+ NOTE: ============================================
+ NOTE: Study ID  : HTN101-301
+ NOTE: Root      : /home/u64305129/Project/HTN101
+ NOTE: SDTM lib  : /home/u64305129/Project/HTN101/data/sdtm
+ NOTE: ADaM lib  : /home/u64305129/Project/HTN101/data/adam
+ NOTE: QC lib    : /home/u64305129/Project/HTN101/validation/QC
+ NOTE: Tables    : /home/u64305129/Project/HTN101/output/tables
+ NOTE: Listings  : /home/u64305129/Project/HTN101/output/listings
+ NOTE: Figures   : /home/u64305129/Project/HTN101/output/figures
+ NOTE: ============================================
+ 143        
+ 144        title "QC Report — SDTM EX Domain";
+ 145        title2 "Study: &STUDYID";
+ 146        
+ 147        /*==========================================================
+ 148          1. RECORD & SUBJECT COUNT
+ 149        ==========================================================*/
+ 150        proc sql;
+ 151            title3 "1. Record & Subject Counts";
+ 152            select  count(*)                 as N_Records,
+ 153                    count(distinct USUBJID)  as N_Subjects
+ 154            from sdtm.ex;
+ 155        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.00 seconds
+       memory              5610.73k
+       OS Memory           36200.00k
+       Timestamp           10/20/2026 07:30:15 AM
+       Step Count                        598  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     102
+       Page Swaps                        0
+       Voluntary Context Switches        16
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           8
+       
+ 
+ 156        
+ 157        /*==========================================================
+ 158          2. ONE RECORD PER EXSEQ PER SUBJECT (uniqueness)
+ 159        ==========================================================*/
+ 160        proc sql;
+ 161            title3 "2. Duplicate EXSEQ per Subject - Should be 0 rows";
+ 162            select USUBJID, EXSEQ, count(*) as N
+ 163            from sdtm.ex
+ 164            group by USUBJID, EXSEQ
+ 165            having count(*) > 1;
+ NOTE: No rows were selected.
+ 166        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.00 seconds
+       memory              5609.64k
+       OS Memory           36200.00k
+       Timestamp           10/20/2026 07:30:15 AM
+       Step Count                        599  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     103
+       Page Swaps                        0
+       Voluntary Context Switches        18
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           8
+       
+ 
+ 167        
+ 168        /*==========================================================
+ 169          3. REQUIRED VARIABLES — MISSING CHECK
+ 170        ==========================================================*/
+ 171        proc freq data = sdtm.ex;
+ 172            title3 "3. Missing Value Check — Key Variables";
+ 173            tables STUDYID DOMAIN USUBJID EXSEQ EXTRT EXDOSE EXDOSU
+ 174                   EXSTDTC / missing nocum;
+ 175        run;
+ 
+ NOTE: There were 231 observations read from the data set SDTM.EX.
+ NOTE: PROCEDURE FREQ used (Total process time):
+       real time           0.10 seconds
+       user cpu time       0.10 seconds
+       system cpu time     0.01 seconds
+       memory              1166.90k
+       OS Memory           31336.00k
+       Timestamp           10/20/2026 07:30:15 AM
+       Step Count                        600  Switch Count  3
+       Page Faults                       0
+       Page Reclaims                     169
+       Page Swaps                        0
+       Voluntary Context Switches        33
+       Involuntary Context Switches      3
+       Block Input Operations            0
+       Block Output Operations           312
+       
+ 
+ 176        
+ 177        /*==========================================================
+ 178          4. STUDYID & DOMAIN CONSTANT
+ 179        ==========================================================*/
+ 180        proc freq data = sdtm.ex;
+ 181            title3 "4. STUDYID and DOMAIN — Should be Constant";
+ 182            tables STUDYID DOMAIN / missing nocum;
+ 183        run;
+ 
+ NOTE: There were 231 observations read from the data set SDTM.EX.
+ NOTE: PROCEDURE FREQ used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.02 seconds
+       system cpu time     0.00 seconds
+       memory              948.62k
+       OS Memory           31336.00k
+       Timestamp           10/20/2026 07:30:15 AM
+       Step Count                        601  Switch Count  3
+       Page Faults                       0
+       Page Reclaims                     146
+       Page Swaps                        0
+       Voluntary Context Switches        31
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           280
+       
+ 
+ 184        
+ 185        /*==========================================================
+ 186          5. TREATMENT DISTRIBUTION (EXTRT)
+ 187        ==========================================================*/
+ 188        proc freq data = sdtm.ex;
+ 189            title3 "5. Actual Treatment Distribution (EXTRT)";
+ 190            tables EXTRT / missing nocum;
+ 191        run;
+ 
+ NOTE: There were 231 observations read from the data set SDTM.EX.
+ NOTE: PROCEDURE FREQ used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.00 seconds
+       memory              932.18k
+       OS Memory           31336.00k
+       Timestamp           10/20/2026 07:30:15 AM
+       Step Count                        602  Switch Count  3
+       Page Faults                       0
+       Page Reclaims                     121
+       Page Swaps                        0
+       Voluntary Context Switches        36
+       Involuntary Context Switches      2
+       Block Input Operations            0
+       Block Output Operations           264
+       
+ 
+ 192        
+ 193        /*==========================================================
+ 194          6. DOSE CONSISTENCY — HTN-101 should be 50 mg, Placebo = 0
+ 195        ==========================================================*/
+ 196        proc freq data = sdtm.ex;
+ 197            title3 "6. Dose Consistency — EXTRT × EXDOSE × EXDOSU";
+ 198            tables EXTRT * EXDOSE * EXDOSU / list missing;
+ 199        run;
+ 
+ NOTE: There were 231 observations read from the data set SDTM.EX.
+ NOTE: PROCEDURE FREQ used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.02 seconds
+       system cpu time     0.00 seconds
+       memory              1689.46k
+       OS Memory           32116.00k
+       Timestamp           10/20/2026 07:30:15 AM
+       Step Count                        603  Switch Count  9
+       Page Faults                       0
+       Page Reclaims                     315
+       Page Swaps                        0
+       Voluntary Context Switches        74
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           1064
+       
+ 
+ 200        
+ 201        /*==========================================================
+ 202          7. DATE LOGIC — EXSTDTC ≤ EXENDTC
+ 203        ==========================================================*/
+ 204        data _check_dates;
+ 205            set sdtm.ex;
+ 206            if not missing(EXSTDTC) and not missing(EXENDTC) then do;
+ 207                EXSTDT = input(EXSTDTC, e8601dt16.);
+ 208                EXENDT = input(EXENDTC, e8601dt16.);
+ 209                if EXSTDT > EXENDT then output;
+ 210            end;
+ 211        run;
+ 
+ NOTE: There were 231 observations read from the data set SDTM.EX.
+ NOTE: The data set WORK._CHECK_DATES has 0 observations and 17 variables.
+ NOTE: DATA statement used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.00 seconds
+       system cpu time     0.00 seconds
+       memory              1081.00k
+       OS Memory           31336.00k
+       Timestamp           10/20/2026 07:30:15 AM
+       Step Count                        604  Switch Count  2
+       Page Faults                       0
+       Page Reclaims                     122
+       Page Swaps                        0
+       Voluntary Context Switches        21
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           264
+       
+ 
+ 212        
+ 213        proc sql;
+ 214            title3 "7. EXSTDTC > EXENDTC — Should be 0 rows";
+ 215            select USUBJID, EXSEQ, EXSTDTC, EXENDTC from _check_dates;
+ NOTE: No rows were selected.
+ 216        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.00 seconds
+       memory              5608.57k
+       OS Memory           36200.00k
+       Timestamp           10/20/2026 07:30:15 AM
+       Step Count                        605  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     56
+       Page Swaps                        0
+       Voluntary Context Switches        14
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           0
+       
+ 
+ 217        
+ 218        /*==========================================================
+ 219          8. STUDY DAY CHECK — EXSTDY should never be 0
+ 220        ==========================================================*/
+ 221        proc sql;
+ 222            title3 "8. EXSTDY = 0 — Should be 0 rows (no Day 0)";
+ 223            select USUBJID, EXSEQ, EXSTDTC, EXSTDY
+ 224            from sdtm.ex
+ 225            where EXSTDY = 0;
+ NOTE: No rows were selected.
+ 226        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.00 seconds
+       system cpu time     0.00 seconds
+       memory              5608.45k
+       OS Memory           36200.00k
+       Timestamp           10/20/2026 07:30:15 AM
+       Step Count                        606  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     56
+       Page Swaps                        0
+       Voluntary Context Switches        17
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           0
+       
+ 
+ 227        
+ 228        /*==========================================================
+ 229          9. CROSS-DOMAIN — Every DM Subject Should Exist in EX
+ 230        ==========================================================*/
+ 231        proc sql;
+ 232            title3 "9. Subjects in DM but Not in EX";
+ 233            select USUBJID from sdtm.dm
+ 234            where USUBJID not in (select distinct USUBJID from sdtm.ex);
+ NOTE: No rows were selected.
+ 235        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.00 seconds
+       memory              5882.76k
+       OS Memory           36460.00k
+       Timestamp           10/20/2026 07:30:15 AM
+       Step Count                        607  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     89
+       Page Swaps                        0
+       Voluntary Context Switches        19
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           8
+       
+ 
+ 236        
+ 237        /*==========================================================
+ 238          10. RFXSTDTC (DM) should match min(EXSTDTC) per subject
+ 239        ==========================================================*/
+ 240        proc sql;
+ 241            create table ex_min as
+ 242            select USUBJID, min(EXSTDTC) as MIN_EXSTDTC
+ 243            from sdtm.ex
+ 244            group by USUBJID;
+ NOTE: Table WORK.EX_MIN created, with 100 rows and 2 columns.
+ 
+ 245        
+ 246            create table _check_rfx as
+ 247            select d.USUBJID, d.RFXSTDTC, e.MIN_EXSTDTC
+ 248            from sdtm.dm as d
+ 249            left join ex_min as e
+ 250              on d.USUBJID = e.USUBJID
+ 251            where d.RFXSTDTC ne e.MIN_EXSTDTC;
+ NOTE: Table WORK._CHECK_RFX created, with 0 rows and 3 columns.
+ 
+ 252        
+ 253            title3 "10. DM.RFXSTDTC ≠ min(EX.EXSTDTC) — Should be 0 rows";
+ 254            select * from _check_rfx;
+ NOTE: No rows were selected.
+ 255        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.00 seconds
+       memory              5979.29k
+       OS Memory           36460.00k
+       Timestamp           10/20/2026 07:30:15 AM
+       Step Count                        608  Switch Count  5
+       Page Faults                       0
+       Page Reclaims                     369
+       Page Swaps                        0
+       Voluntary Context Switches        49
+       Involuntary Context Switches      3
+       Block Input Operations            0
+       Block Output Operations           544
+       
+ 
+ 256        
+ 257        /*==========================================================
+ 258          11. FINAL SUMMARY
+ 259        ==========================================================*/
+ 260        proc sql;
+ 261            title3 "11. QC Summary — EX Domain";
+ 262            select  "Total Records"             as Check length=30,
+ 263                    put(count(*), 8.)           as Result
+ 264            from sdtm.ex
+ 265            union all
+ 266            select  "Distinct Subjects",
+ 267                    put(count(distinct USUBJID), 8.)
+ 268            from sdtm.ex
+ 269            union all
+ 270            select  "HTN-101 Records",
+ 271                    put(sum(EXTRT = "HTN-101"), 8.)
+ 272            from sdtm.ex
+ 273            union all
+ 274            select  "Placebo Records",
+ 275                    put(sum(EXTRT = "PLACEBO"), 8.)
+ 276            from sdtm.ex
+ 277            union all
+ 278            select  "Missing EXSTDTC",
+ 279                    put(sum(EXSTDTC = ""), 8.)
+ 280            from sdtm.ex
+ 281            union all
+ 282            select  "EXSTDY = 0 (should be 0)",
+ 283                    put(sum(EXSTDY = 0), 8.)
+ 284            from sdtm.ex;
+ 285        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.01 seconds
+       memory              5788.32k
+       OS Memory           36200.00k
+       Timestamp           10/20/2026 07:30:15 AM
+       Step Count                        609  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     82
+       Page Swaps                        0
+       Voluntary Context Switches        19
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           24
+       
+ 
+ 286        
+ 287        title; title2; title3;
+ 288        
+ 289        OPTIONS NONOTES NOSTIMER NOSOURCE NOSYNTAXCHECK;
+ 299        

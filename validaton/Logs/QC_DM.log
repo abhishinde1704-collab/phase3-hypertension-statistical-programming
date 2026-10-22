@@ -1,0 +1,424 @@
+ 
+ 1          OPTIONS NONOTES NOSTIMER NOSOURCE NOSYNTAXCHECK;
+ 68         
+ 69         /*==========================================================
+ 70           Program : QC_DM.sas
+ 71           Study   : HTN101-301
+ 72           Purpose : QC of SDTM DM domain
+ 73           Author  : Abhijeet Shinde
+ 74         ==========================================================*/
+ 75         
+ 76         %include "&ROOT/programs/sas/00_setup.sas";
+ NOTE: Libref RAW was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/data/raw
+ NOTE: Libref SDTM was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/data/sdtm
+ NOTE: Libref ADAM was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/data/adam
+ NOTE: Libref OUT was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/output
+ NOTE: Libref _T1 was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/output/tables
+ NOTE: Libref _T2 was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/output/listings
+ NOTE: Libref _T3 was successfully assigned as follows: 
+       Engine:        V9 
+       Physical Name: /home/u64305129/Project/HTN101/output/figures
+ NOTE: ============================================
+ NOTE: Study ID  : HTN101-301
+ NOTE: Root      : /home/u64305129/Project/HTN101
+ NOTE: SDTM lib  : /home/u64305129/Project/HTN101/data/sdtm
+ NOTE: ADaM lib  : /home/u64305129/Project/HTN101/data/adam
+ NOTE: QC lib    : /home/u64305129/Project/HTN101/validation/QC
+ NOTE: Tables    : /home/u64305129/Project/HTN101/output/tables
+ NOTE: Listings  : /home/u64305129/Project/HTN101/output/listings
+ NOTE: Figures   : /home/u64305129/Project/HTN101/output/figures
+ NOTE: ============================================
+ 143        
+ 144        /*==========================================================
+ 145          1. STRUCTURE CHECK — Variables, types, lengths
+ 146        ==========================================================*/
+ 147        proc contents data = sdtm.dm varnum;
+ 148            title "QC DM — Structure";
+ 149        run;
+ 
+ NOTE: PROCEDURE CONTENTS used (Total process time):
+       real time           0.05 seconds
+       user cpu time       0.05 seconds
+       system cpu time     0.00 seconds
+       memory              1842.87k
+       OS Memory           30568.00k
+       Timestamp           10/20/2026 07:30:05 AM
+       Step Count                        580  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     140
+       Page Swaps                        0
+       Voluntary Context Switches        15
+       Involuntary Context Switches      4
+       Block Input Operations            0
+       Block Output Operations           24
+       
+ 
+ 150        
+ 151        /*==========================================================
+ 152          2. RECORD & SUBJECT COUNT
+ 153        ==========================================================*/
+ 154        proc sql;
+ 155            title "QC DM — Counts";
+ 156            select  count(*)                 as N_Records,
+ 157                    count(distinct USUBJID)  as N_Subjects
+ 158            from sdtm.dm;
+ 159        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.00 seconds
+       memory              5612.75k
+       OS Memory           35432.00k
+       Timestamp           10/20/2026 07:30:05 AM
+       Step Count                        581  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     77
+       Page Swaps                        0
+       Voluntary Context Switches        17
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           8
+       
+ 
+ 160        
+ 161        /*==========================================================
+ 162          3. ONE RECORD PER SUBJECT
+ 163        ==========================================================*/
+ 164        proc sql;
+ 165            title "QC DM — Duplicate Subjects";
+ 166            select USUBJID, count(*) as N
+ 167            from sdtm.dm
+ 168            group by USUBJID
+ 169            having count(*) > 1;
+ NOTE: No rows were selected.
+ 170        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.00 seconds
+       memory              5612.71k
+       OS Memory           35432.00k
+       Timestamp           10/20/2026 07:30:05 AM
+       Step Count                        582  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     109
+       Page Swaps                        0
+       Voluntary Context Switches        17
+       Involuntary Context Switches      2
+       Block Input Operations            0
+       Block Output Operations           8
+       
+ 
+ 171        
+ 172        /*==========================================================
+ 173          4. USUBJID FORMAT CHECK
+ 174           USUBJID should be SITEID-SUBJID
+ 175        ==========================================================*/
+ 176        data _check_usubjid;
+ 177            set sdtm.dm;
+ 178            length EXPECTED $40;
+ 179            EXPECTED = catx("-",STUDYID,SUBJID);
+ 180            if USUBJID ne EXPECTED then output;
+ 181        run;
+ 
+ NOTE: There were 100 observations read from the data set SDTM.DM.
+ NOTE: The data set WORK._CHECK_USUBJID has 100 observations and 21 variables.
+ NOTE: DATA statement used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.00 seconds
+       system cpu time     0.00 seconds
+       memory              982.28k
+       OS Memory           30568.00k
+       Timestamp           10/20/2026 07:30:05 AM
+       Step Count                        583  Switch Count  2
+       Page Faults                       0
+       Page Reclaims                     114
+       Page Swaps                        0
+       Voluntary Context Switches        21
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           264
+       
+ 
+ 182        
+ 183        proc sql;
+ 184            title "QC DM — USUBJID Format Errors";
+ 185            select USUBJID, SITEID, SUBJID from _check_usubjid;
+ 186        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.05 seconds
+       user cpu time       0.05 seconds
+       system cpu time     0.01 seconds
+       memory              5609.81k
+       OS Memory           35432.00k
+       Timestamp           10/20/2026 07:30:05 AM
+       Step Count                        584  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     55
+       Page Swaps                        0
+       Voluntary Context Switches        13
+       Involuntary Context Switches      3
+       Block Input Operations            0
+       Block Output Operations           16
+       
+ 
+ 187        
+ 188        /*==========================================================
+ 189          5. MISSING VALUES — Key Variables
+ 190        ==========================================================*/
+ 191        proc freq data = sdtm.dm;
+ 192            title "QC DM — Missing Value Check";
+ 193            tables STUDYID DOMAIN USUBJID SUBJID SITEID
+ 194                   SEX RACE ARMCD ARM ACTARMCD ACTARM
+ 195                   RFSTDTC
+ 196                   / missing nocum;
+ 197        run;
+ 
+ NOTE: There were 100 observations read from the data set SDTM.DM.
+ NOTE: PROCEDURE FREQ used (Total process time):
+       real time           0.16 seconds
+       user cpu time       0.16 seconds
+       system cpu time     0.00 seconds
+       memory              1215.96k
+       OS Memory           30824.00k
+       Timestamp           10/20/2026 07:30:05 AM
+       Step Count                        585  Switch Count  3
+       Page Faults                       0
+       Page Reclaims                     202
+       Page Swaps                        0
+       Voluntary Context Switches        36
+       Involuntary Context Switches      7
+       Block Input Operations            0
+       Block Output Operations           344
+       
+ 
+ 198        
+ 199        /*==========================================================
+ 200          6. CONTROLLED TERMINOLOGY
+ 201        ==========================================================*/
+ 202        proc freq data = sdtm.dm;
+ 203            title "QC DM — Treatment & Demographics Distribution";
+ 204            tables SEX RACE ARMCD ACTARMCD / missing nocum;
+ 205        run;
+ 
+ NOTE: There were 100 observations read from the data set SDTM.DM.
+ NOTE: PROCEDURE FREQ used (Total process time):
+       real time           0.02 seconds
+       user cpu time       0.03 seconds
+       system cpu time     0.00 seconds
+       memory              918.96k
+       OS Memory           30824.00k
+       Timestamp           10/20/2026 07:30:05 AM
+       Step Count                        586  Switch Count  3
+       Page Faults                       0
+       Page Reclaims                     145
+       Page Swaps                        0
+       Voluntary Context Switches        33
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           280
+       
+ 
+ 206        
+ 207        /*==========================================================
+ 208          7. AGE CHECK
+ 209        ==========================================================*/
+ 210        proc means data = sdtm.dm n nmiss min max mean;
+ 211            title "QC DM — Age Summary";
+ 212            var AGE;
+ 213        run;
+ 
+ NOTE: There were 100 observations read from the data set SDTM.DM.
+ NOTE: PROCEDURE MEANS used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.02 seconds
+       system cpu time     0.00 seconds
+       memory              6978.46k
+       OS Memory           36744.00k
+       Timestamp           10/20/2026 07:30:05 AM
+       Step Count                        587  Switch Count  2
+       Page Faults                       0
+       Page Reclaims                     1638
+       Page Swaps                        0
+       Voluntary Context Switches        35
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           0
+       
+ 
+ 214        
+ 215        /*==========================================================
+ 216          8. AGE DERIVATION CHECK
+ 217           AGE should match BRTHDTC vs RFSTDTC
+ 218        ==========================================================*/
+ 219        data _check_age;
+ 220            set sdtm.dm;
+ 221            if not missing(BRTHDTC) and not missing(RFSTDTC) then do;
+ 222                BDT = input(BRTHDTC, yymmdd10.);
+ 223                RDT = datepart(input(RFSTDTC, e8601dt16.));
+ 224                CALC_AGE = floor((RDT - BDT) / 365.25);
+ 225                if abs(AGE - CALC_AGE) > 1 then output;
+ 226            end;
+ 227        run;
+ 
+ NOTE: There were 100 observations read from the data set SDTM.DM.
+ NOTE: The data set WORK._CHECK_AGE has 0 observations and 23 variables.
+ NOTE: DATA statement used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.00 seconds
+       system cpu time     0.00 seconds
+       memory              1016.43k
+       OS Memory           31080.00k
+       Timestamp           10/20/2026 07:30:05 AM
+       Step Count                        588  Switch Count  2
+       Page Faults                       0
+       Page Reclaims                     120
+       Page Swaps                        0
+       Voluntary Context Switches        23
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           264
+       
+ 
+ 228        
+ 229        proc sql;
+ 230            title "QC DM — Age Derivation Errors";
+ 231            select USUBJID, BRTHDTC, RFSTDTC, AGE, CALC_AGE
+ 232            from _check_age;
+ NOTE: No rows were selected.
+ 233        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.00 seconds
+       system cpu time     0.00 seconds
+       memory              5610.21k
+       OS Memory           35944.00k
+       Timestamp           10/20/2026 07:30:05 AM
+       Step Count                        589  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     55
+       Page Swaps                        0
+       Voluntary Context Switches        13
+       Involuntary Context Switches      0
+       Block Input Operations            0
+       Block Output Operations           0
+       
+ 
+ 234        
+ 235        /*==========================================================
+ 236          9. RFSTDTC MUST MATCH FIRST EXSTDTC IN EX
+ 237        ==========================================================*/
+ 238        proc sql;
+ 239            title "QC DM — RFSTDTC vs First EXSTDTC";
+ 240            select  d.USUBJID,
+ 241                    d.RFSTDTC       as DM_RFSTDTC,
+ 242                    min(e.EXSTDTC)  as FIRST_EX
+ 243            from sdtm.dm as d
+ 244            left join sdtm.ex as e
+ 245              on d.USUBJID = e.USUBJID
+ 246            group by d.USUBJID, d.RFSTDTC;
+ 247        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.05 seconds
+       user cpu time       0.04 seconds
+       system cpu time     0.00 seconds
+       memory              6013.14k
+       OS Memory           36300.00k
+       Timestamp           10/20/2026 07:30:05 AM
+       Step Count                        590  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     421
+       Page Swaps                        0
+       Voluntary Context Switches        33
+       Involuntary Context Switches      6
+       Block Input Operations            0
+       Block Output Operations           40
+       
+ 
+ 248        /*==========================================================
+ 249          10. TREATMENT DISTRIBUTION (Expected 50/50)
+ 250        ==========================================================*/
+ 251        proc sql;
+ 252            title "QC DM — Treatment Distribution";
+ 253            select  ARMCD,
+ 254                    count(*) as N
+ 255            from sdtm.dm
+ 256            group by ARMCD;
+ 257        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.00 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.01 seconds
+       memory              5612.71k
+       OS Memory           37992.00k
+       Timestamp           10/20/2026 07:30:05 AM
+       Step Count                        591  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     90
+       Page Swaps                        0
+       Voluntary Context Switches        19
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           24
+       
+ 
+ 258        
+ 259        /*==========================================================
+ 260          11. SUMMARY DASHBOARD
+ 261        ==========================================================*/
+ 262        proc sql;
+ 263            title "QC DM — Summary Dashboard";
+ 264            select "Total Records"     as Check length = 25,
+ 265                   put(count(*), 8.)   as Value
+ 266            from sdtm.dm
+ 267            union all
+ 268            select "Distinct Subjects",
+ 269                   put(count(distinct USUBJID), 8.)
+ 270            from sdtm.dm
+ 271            union all
+ 272            select "HTN-101 Subjects",
+ 273                   put(sum(ARMCD = "HTN101"), 8.)
+ 274            from sdtm.dm
+ 275            union all
+ 276            select "Placebo Subjects",
+ 277                   put(sum(ARMCD = "PBO"), 8.)
+ 278            from sdtm.dm
+ 279            union all
+ 280            select "Missing RFSTDTC",
+ 281                   put(sum(RFSTDTC = ""), 8.)
+ 282            from sdtm.dm;
+ 283        quit;
+ NOTE: PROCEDURE SQL used (Total process time):
+       real time           0.01 seconds
+       user cpu time       0.01 seconds
+       system cpu time     0.00 seconds
+       memory              5766.71k
+       OS Memory           37992.00k
+       Timestamp           10/20/2026 07:30:05 AM
+       Step Count                        592  Switch Count  1
+       Page Faults                       0
+       Page Reclaims                     74
+       Page Swaps                        0
+       Voluntary Context Switches        19
+       Involuntary Context Switches      1
+       Block Input Operations            0
+       Block Output Operations           8
+       
+ 
+ 284        
+ 285        title;
+ 286        
+ 287        OPTIONS NONOTES NOSTIMER NOSOURCE NOSYNTAXCHECK;
+ 297        
